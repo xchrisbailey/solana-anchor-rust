@@ -58,7 +58,7 @@ pub enum GameState {
 
 #[derive(Accounts)]
 pub struct SetupGame<'info> {
-    #[account(init, payer = player_one)]
+    #[account(init, payer = player_one, space = Game::MAXIMUM_SIZE + 8)]
     pub game: Account<'info, Game>,
     #[account(mut)]
     pub player_one: Signer<'info>,
@@ -87,6 +87,8 @@ pub enum TicTacToeError {
 }
 
 impl Game {
+    const MAXIMUM_SIZE: usize = 116;
+
     pub fn is_active(&self) -> bool {
         self.state == GameState::Active
     }
@@ -141,12 +143,14 @@ impl Game {
                 };
                 return;
             }
+
             if self.is_winning_trio([(0, i), (1, i), (2, i)]) {
                 self.state = GameState::Won {
                     winner: self.current_player(),
                 };
                 return;
             }
+
             if self.is_winning_trio([(0, 0), (1, 1), (2, 2)]) {
                 self.state = GameState::Won {
                     winner: self.current_player(),
